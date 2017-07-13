@@ -1,1 +1,1 @@
-# labelpropagation
+# label_propagation
