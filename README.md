@@ -12,6 +12,8 @@ Libraries Used
 - Python
   1. [numpy](http://www.numpy.org/)
   2. [scikit-learn](http://scikit-learn.org/stable/)
+  3. [PuLP](http://pythonhosted.org/PuLP/)
+  4. [itertools](https://docs.python.org/2/library/itertools.html)
   
 Usage for LP
 ---
