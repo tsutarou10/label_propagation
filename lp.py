@@ -25,8 +25,8 @@ class LabelPropagation:
 		teY = np.load('test_labels.npy') # Label of test data 
 		Y = np.r_[trY,teY]
 		V = Y.shape[0] # the number of data
-		I = np.matrix(np.identity(V))
 		P = np.load('P.npy') # load the probabilistic transition matrix
+		PP = np.load('PP.npy')
 		Yl = Y[0:int(trY.shape[0])] # labeled data
 		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
 
