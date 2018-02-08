@@ -27,7 +27,6 @@ class LabelPropagation:
 		V = Y.shape[0] # the number of data
 		I = np.matrix(np.identity(V))
 		P = np.load('P.npy') # load the probabilistic transition matrix
-
 		Yl = Y[0:int(trY.shape[0])] # labeled data
 		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
 
@@ -35,6 +34,7 @@ class LabelPropagation:
 
 		Y_prev = np.r_[Yl,Yu]
 		Y_next = []
+
 		while 1:
 			Y_next = P.dot(Y_prev)
 			
@@ -110,5 +110,5 @@ class LabelPropagation:
 
 if __name__ == "__main__":
 	lp = LabelPropagation()
-	#lp.make_par() # make parametars for label propagation
+	lp.make_par() # make parametars for label propagation
 	lp.metrics_lp() # print micro recall, precision and f1 score of label propagation 
