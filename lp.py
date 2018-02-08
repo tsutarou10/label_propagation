@@ -91,7 +91,7 @@ class LabelPropagation:
 	def metrics_lp(self):
 		'''
 		'''
-		thresholds = 0.2 #thresholds for label assignment after the iteration of LP
+		thresholds = 0.4 #thresholds for label assignment after the iteration of LP
 		
 		trY = np.load('training_labels.npy') # label of training data
 		teY = np.load('test_labels.npy') # label of test data
