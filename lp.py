@@ -2,95 +2,113 @@
 #!/usr/bin/python
 
 import numpy as np
+from sklearn import datasets
+import os
 from sklearn.metrics import recall_score,precision_score,f1_score
-from sklearn.model_selection import train_test_split
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
-class Lp:
+class LabelPropagation:
+
 	def __init__(self):
-		self.K = 30
-		self.T = 50
-		self.l = 0.1
+		'''
+		set hyper parametars
+		'''
 		self.m = 1.0
-		self.cat_num = 22
-
-	def set_features_labels(self):
-		
-		labels = np.load("all_labels.npy")
-		features = np.load("all_features.npy")
-		return features,labels
 
 	def lp(self):
-		for k in range(10):
-			X,Y = self.set_features_labels()
-			Y = np.array(Y,dtype = float)
-			V = Y.shape[0]
-			I = np.matrix(np.identity(V))			
-			indices = np.random.permutation(X.shape[0])
-			X = X[indices]
-			Y = Y[indices]
-			Xl,Xu,Yl,Yu = train_test_split(X,Y,test_size = 0.95,random_state = 1)
-			Yu_ = np.zeros((Xu.shape[0],self.cat_num))
-			X = np.r_[Xl,Xu]
-			self.make_par(X)
-			P,W,PP,WW = self.set_par()
+		'''
+		Label Propagation
+		'''
+
+		trY = np.load('training_labels.npy') #Label of training data
+		teY = np.load('test_labels.npy') # Label of test data 
+		Y = np.r_[trY,teY]
+		V = Y.shape[0] # the number of data
+		I = np.matrix(np.identity(V))
+		P = np.load('P.npy') # load the probabilistic transition matrix
+
+		Yl = Y[0:int(trY.shape[0])] # labeled data
+		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
+
+		iterNum = 0 # the number of current iteration
+
+		Y_prev = np.r_[Yl,Yu]
+		Y_next = []
+		while 1:
+			Y_next = P.dot(Y_prev)
 			
-			Y_prev = np.r_[Yl,Yu_]
-			Y_next = []
+			Y_next[0:int(trY.shape[0])] = Yl #clamping
+			print 'iter:' + str(iterNum) + '->' + 'error rate : ' + str((abs(Y_prev - Y_next)).sum())
 
-			scores1 = []
-			scores2 = []
-			scores3 = []
+			if (Y_next == Y_prev).all(): #convergence
+				break
 
-			for t in range(self.T):
-				Y_next = P.dot(Y_prev)
-				Y_next[0:int(Y.shape[0] * 0.05)] = Yl
-				Y_prev = Y_next
+			Y_prev = Y_next
+			iterNum += 1
 
-			i = 80
-			Y_next_max = np.max(Y_next,axis=1)[:,np.newaxis]
-			Y_next[np.where(Y_next >= Y_next_max * i * 0.01)] = 1
-			Y_next[np.where(Y_next < Y_next_max * i * 0.01)] = 0
-			score1 = precision_score(Y_next[int(Y.shape[0] * 0.05):],Yu,average = "micro")
-			score2 = recall_score(Y_next[int(Y.shape[0] * 0.05):],Yu,average = "micro")
-			score3 = f1_score(Y_next[int(Y.shape[0] * 0.05):],Yu,average = "micro")
-			scores1.append(score1)
-			scores2.append(score2)
-			scores3.append(score3)
+		return Y_next
 
-		print "micro precision    : %.2f" % np.array(scores1).mean()
-		print "micro recall    : %.2f" % np.array(scores2).mean()
-		print "micro F1        : %.2f" % np.array(scores3).mean()
+	def make_par(self):
+		'''
+		make parameters for label propagation
+		'''
 
-	def make_par(self,X):
-		V = X.shape[0]
-		P = np.zeros([V,V])
-		PP = np.zeros([V,V])
-		W = np.zeros([V,V])
-		WW = np.zeros([V,V])
+		trX = np.load('training_features.npy') #the features of training data
+		teX = np.load('test_features.npy')	#the features of test data
 
+		X = np.r_[trX,teX]
+
+		V = X.shape[0] #the number of data
+
+		P = np.zeros([V,V]) #probabilistic transition matrix
+		W = np.zeros([V,V]) #weight matrix
+		
 		dis_array = np.zeros([V,V],dtype = float)
 		H = np.tile(np.diag(np.dot(X,X.T)),(V,1))
 		G = np.dot(X,X.T)
 		dis_array = H - 2 * G + H.T
 
-		W = np.exp(-1 * dis_array ** 2 / self.m)
+		W = np.exp(-1 * dis_array / self.m)
+		for i in range(W.shape[0]):
+			W[i][i] = 0.0
 		W_sum = np.sum(W,axis = 1)
 
-		print "make W"
-
 		P = W / W_sum[:,np.newaxis]
-		print "make P"
-
-		np.save("P.npy",P)
-		np.save("W.npy",W)
+		
+		np.save("P.npy",P) #save posibility transition matrix
+		np.save("W.npy",W) #save weight
+		print 'finish making parametars!'
 
 	def set_par(self):
+		'''
+		set parametars for label propagation
+		'''
 		P = np.load("P.npy")
-		W = np.load("W.npy")
 
-		return P,W
+		return P
+
+	def metrics_lp(self):
+		'''
+		'''
+		thresholds = 0.2 #thresholds for label assignment after the iteration of LP
+		
+		trY = np.load('training_labels.npy') # label of training data
+		teY = np.load('test_labels.npy') # label of test data
+		y_true = np.r_[trY,teY]
+
+		y_pred = self.lp() # assign a label
+		y_pred[np.where(y_pred > thresholds)] = 1
+		y_pred[np.where(y_pred <= thresholds)] = 0
+		microrecall = recall_score(teY, y_pred[int(trY.shape[0]):], average='micro')
+		microprecision = precision_score(teY, y_pred[int(trY.shape[0]):], average='micro')
+		microf1 = f1_score(teY, y_pred[int(trY.shape[0]):], average='micro')
+			
+		print 'micro recall score : ' + str(microrecall)
+		print 'micro precision score : ' + str(microprecision)
+		print 'micro f1 score : ' + str(microf1)
 
 if __name__ == "__main__":
-	l = Lp()
-	l.Lp()
-	print "finish"
+	lp = LabelPropagation()
+	#lp.make_par() # make parametars for label propagation
+	lp.metrics_lp() # print micro recall, precision and f1 score of label propagation 
