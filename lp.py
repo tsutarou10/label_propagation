@@ -91,15 +91,30 @@ class LabelPropagation:
 	def metrics_lp(self):
 		'''
 		'''
-		thresholds = 0.4 #thresholds for label assignment after the iteration of LP
+		#thresholds = 0.4 #thresholds for label assignment after the iteration of LP
 		
 		trY = np.load('training_labels.npy') # label of training data
 		teY = np.load('test_labels.npy') # label of test data
 		y_true = np.r_[trY,teY]
 
 		y_pred = self.lp() # assign a label
-		y_pred[np.where(y_pred > thresholds)] = 1
-		y_pred[np.where(y_pred <= thresholds)] = 0
+		
+		np.save('y_pred_of_lp.npy',y_pred[int(trY.shape[0]):])
+
+		y_pred_max = np.argmax(y_pred,axis = 1)[:,np.newaxis]
+		y_pred_max = y_pred_max.reshape(y_pred_max.shape[0],y_pred_max.shape[1])
+		
+		for number,ypm in enumerate(y_pred_max):
+			if ypm == 0:
+				n = [1,2]
+			elif ypm == 1:
+				n = [0,2]
+			else:
+				n = [0,1]
+			y_pred[number][ypm] = 1
+			y_pred[number][n] = 0
+
+		print y_pred
 		microrecall = recall_score(teY, y_pred[int(trY.shape[0]):], average='micro')
 		microprecision = precision_score(teY, y_pred[int(trY.shape[0]):], average='micro')
 		microf1 = f1_score(teY, y_pred[int(trY.shape[0]):], average='micro')

@@ -17,15 +17,21 @@ Libraries Used
   
 Usage for LP
 ---
-now writing
+~~~
+python lp.py
+~~~
 
 Usage for DLP
 ---
-now writing
+~~~
+python dlp.py
+~~~
 
-Usage for LNP
+Usage for LNP (I am sorry, I am revisioning a file of LNP...)
 ---
-now writing
+~~~
+python lnp.py
+~~~
 
 Reference
 ---

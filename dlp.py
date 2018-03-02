@@ -40,8 +40,7 @@ class DynamicLabelPropagation:
 		Y_prev = np.r_[Yl,Yu]
 		Y_next = []
 
-		#while 1:
-		for i in range(1000):
+		while 1:
 			Y_next = P.dot(Y_prev)
 			Y_next[0:int(trY.shape[0])] = Yl #clamping
 			print 'iter:' + str(iterNum) + '->' + 'error rate : ' + str((abs(Y_prev - Y_next)).sum())
@@ -124,9 +123,7 @@ class DynamicLabelPropagation:
 		'''
 		thresholds = 0.5 #thresholds for dynamic label assignment after the iteration of LP
 		
-		trY = np.load('training_labels.npy') # label of training data
 		teY = np.load('test_labels.npy') # label of test data
-		y_true = np.r_[trY,teY]
 
 		y_pred = self.dlp() # assign a label
 		y_pred[np.where(y_pred > thresholds)] = 1
