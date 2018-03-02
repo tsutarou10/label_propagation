@@ -1,4 +1,4 @@
-﻿Source codes for Label Propagation
+﻿Source codes for some algorithms based Label Propagation
  ---
  
 Label propagation (LP) is a graph-based algorithm for multi-label classification. I upload the program I have implemented for my study. 
