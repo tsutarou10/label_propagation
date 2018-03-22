@@ -6,6 +6,7 @@ I have implemented the following some algorithms.
 1. __Label Propagation (LP)__
 2. __Dynamic Label Propagation (DLP)__
 3. __Label Propagation Through Linear Neighborhoods (LNP)__
+4. __Label Propagation Using Amendable Clamping (LPAC)__
   
 Libraries Used
 ---
@@ -33,6 +34,12 @@ Usage for LNP (I am sorry, I am revisioning a file of LNP...)
 python lnp.py
 ~~~
 
+Usage for LPAC (I am sorry, I am revisioning a file of LPAC...)
+---
+~~~
+python lpac.py
+~~~
+
 Reference
 ---
  X. Zhu,
@@ -49,6 +56,11 @@ Reference
  Label propagation through linear neighborhoods,
  ICML’06, Pittsburgh, Pennsylvania, USA, June 25-29, 2006, pages 985–992, 2006.
  [paper](http://machinelearning.wustl.edu/mlpapers/paper_files/icml2006_WangZ06.pdf)
+
+ T.Miyazaki and Y.Sumikawa,
+ Label Propagation Using Amendable Clamping, WII'2018, Tokyo, Japan, March 11, 2018.
+ [paper](http://ceur-ws.org/Vol-2068/wii10.pdf)
+ [slide](https://www.slideshare.net/MiyazakiTatsurou/label-propagation-using-amendable-clamping?qid=1bf1dfc9-b3ca-4d4a-ae7c-eaa89427dd78&v=&b=&from_search=1)
  
 License
 ---
