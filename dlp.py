@@ -4,7 +4,7 @@
 import numpy as np
 from sklearn import datasets
 import os
-from sklearn.metrics import recall_score,precision_score,f1_score
+from sklearn.metrics import recall_score, precision_score, f1_score
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
@@ -30,16 +30,16 @@ class DynamicLabelPropagation:
 		Dynamic Label Propagation
 		'''
 		trY, teY = self.set_labels() # training and test labels
-		Y = np.r_[trY,teY]
+		Y = np.r_[trY, teY]
 		V = Y.shape[0] # the number of data
 		I = np.matrix(np.identity(V))
 		P, PP = self.set_par() # load the probabilistic transition matrix and fusion matrix
 		Yl = Y[0:int(trY.shape[0])] # labeled data
-		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
+		Yu = np.zeros([V-int(trY.shape[0]), Y.shape[1]]) #unlabeled data
 
 		iterNum = 0 # the number of current iteration
 
-		Y_prev = np.r_[Yl,Yu]
+		Y_prev = np.r_[Yl, Yu]
 		Y_next = []
 
 		while 1:
@@ -70,7 +70,7 @@ class DynamicLabelPropagation:
 
 		return P, PP
 
-	def softmax(self,x):
+	def softmax(self, x):
 		'''
 		softmax function
 		'''
@@ -82,18 +82,18 @@ class DynamicLabelPropagation:
 		'''
 		
 		trX, teX = self.set_features() # training and test features
-		X = np.r_[trX,teX]
+		X = np.r_[trX, teX]
 
 		V = X.shape[0] #the number of data
 
-		P = np.zeros([V,V]) #probabilistic transition matrix
-		W = np.zeros([V,V]) #weight matrix
-		PP = np.zeros([V,V])
-		WW = np.zeros([V,V])
+		P = np.zeros([V, V]) #probabilistic transition matrix
+		W = np.zeros([V, V]) #weight matrix
+		PP = np.zeros([V, V])
+		WW = np.zeros([V, V])
 
-		dis_array = np.zeros([V,V],dtype = float)
-		H = np.tile(np.diag(np.dot(X,X.T)),(V,1))
-		G = np.dot(X,X.T)
+		dis_array = np.zeros([V, V], dtype = float)
+		H = np.tile(np.diag(np.dot(X, X.T)), (V, 1))
+		G = np.dot(X, X.T)
 		dis_array = H - 2 * G + H.T
 
 		W = np.exp(-1 * dis_array / self.m)
@@ -101,20 +101,20 @@ class DynamicLabelPropagation:
 
 		for i in range(W.shape[0]):
 			W[i][i] = 0.0
-		W_sum = np.sum(W,axis = 1)
+		W_sum = np.sum(W, axis = 1)
 
-		P = W / W_sum[:,np.newaxis]
+		P = W / W_sum[:, np.newaxis]
 		print 'making P!'
 
-		nearidx = np.argsort(dis_array,axis=1)
+		nearidx = np.argsort(dis_array, axis=1)
 		
 		for i in range(V):
 			for k in range(self.K):
 				WW[i][nearidx[i][k+1]] = W[i][nearidx[i][k+1]]
 		print 'making WW!'
 
-		WW_sum = np.sum(WW,axis=1)
-		PP = WW / WW_sum[:,np.newaxis]
+		WW_sum = np.sum(WW, axis=1)
+		PP = WW / WW_sum[:, np.newaxis]
 		print 'making PP!'
 
 		if(not os.path.isdir('./parameters')) :
