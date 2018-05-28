@@ -16,17 +16,21 @@ class LabelPropagation:
 		'''
 		self.m = 1.0
 
+		self.trainingFeatures = 'training_features.npy'
+		self.testFeatures = 'test_features.npy'
+		self.trainingLabels = 'training_labels.npy'
+		self.testLabels = 'test_labels.npy'
+
 	def lp(self):
 		'''
 		Label Propagation
 		'''
 
-		trY = np.load('training_labels.npy') #Label of training data
-		teY = np.load('test_labels.npy') # Label of test data 
+		trY, teY = self.set_labels() # trainig and test labels
 		Y = np.r_[trY,teY]
 		V = Y.shape[0] # the number of data
-		P = np.load('P.npy') # load the probabilistic transition matrix
-		PP = np.load('PP.npy')
+		P = self.set_par() # load the probabilistic transition matrix and matrix
+
 		Yl = Y[0:int(trY.shape[0])] # labeled data
 		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
 
@@ -54,9 +58,7 @@ class LabelPropagation:
 		make parameters for label propagation
 		'''
 
-		trX = np.load('training_features.npy') #the features of training data
-		teX = np.load('test_features.npy')	#the features of test data
-
+		trX, teX = self.set_features() # training and test features
 		X = np.r_[trX,teX]
 
 		V = X.shape[0] #the number of data
@@ -70,31 +72,48 @@ class LabelPropagation:
 		dis_array = H - 2 * G + H.T
 
 		W = np.exp(-1 * dis_array / self.m)
+		print 'making W!'
+
 		for i in range(W.shape[0]):
 			W[i][i] = 0.0
 		W_sum = np.sum(W,axis = 1)
 
 		P = W / W_sum[:,np.newaxis]
-		
-		np.save("P.npy",P) #save posibility transition matrix
-		np.save("W.npy",W) #save weight
+		print 'making P!'
+
+		if(not os.path.isdir('./parameters')) :
+			os.mkdir('./parameters')
+
+		np.save("./parameters/P.npy",P) #save posibility transition matrix
+		np.save("./parameters/W.npy",W) #save weight
 		print 'finish making parametars!'
 
 	def set_par(self):
 		'''
 		set parametars for label propagation
 		'''
-		P = np.load("P.npy")
+		P = np.load("./parameters/P.npy")
 
 		return P
+
+	def set_features(self) :
+		trX = np.load(self.trainingFeatures)
+		teX = np.load(self.testFeatures)
+
+		return trX, teX
+
+	def set_labels(self) :
+		trY = np.load(self.trainingLabels)
+		teY = np.load(self.testLabels)
+
+		return trY, teY
 
 	def metrics_lp(self):
 		'''
 		'''
 		#thresholds = 0.4 #thresholds for label assignment after the iteration of LP
 		
-		trY = np.load('training_labels.npy') # label of training data
-		teY = np.load('test_labels.npy') # label of test data
+		trY, teY = self.set_labels() # label of training and test data
 		y_true = np.r_[trY,teY]
 
 		y_pred = self.lp() # assign a label
