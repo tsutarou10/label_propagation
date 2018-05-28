@@ -20,18 +20,20 @@ class DynamicLabelPropagation:
 		self.l = 0.1
 		self.epsiron = 1e-11
 
+		self.trainingFeatures = 'training_features.npy'
+		self.testFeatures = 'test_features.npy'
+		self.trainingLabels = 'training_labels.npy'
+		self.testLabels = 'test_labels.npy'
+
 	def dlp(self):
 		'''
 		Dynamic Label Propagation
 		'''
-
-		trY = np.load('training_labels.npy') #Label of training data
-		teY = np.load('test_labels.npy') # Label of test data 
+		trY, teY = self.set_labels() # training and test labels
 		Y = np.r_[trY,teY]
 		V = Y.shape[0] # the number of data
 		I = np.matrix(np.identity(V))
-		P = np.load('P.npy') # load the probabilistic transition matrix
-		PP = np.load('PP.npy')
+		P, PP = self.set_par() # load the probabilistic transition matrix and fusion matrix
 		Yl = Y[0:int(trY.shape[0])] # labeled data
 		Yu = np.zeros([V-int(trY.shape[0]),Y.shape[1]]) #unlabeled data
 
@@ -58,6 +60,16 @@ class DynamicLabelPropagation:
 
 		return Y_next
 
+	def set_par(self) :
+		'''
+		set parametars for label propagation
+		'''
+
+		P = np.load('./parameters/P.npy')
+		PP = np.load('./parameters/PP.npy')
+
+		return P, PP
+
 	def softmax(self,x):
 		'''
 		softmax function
@@ -68,10 +80,8 @@ class DynamicLabelPropagation:
 		'''
 		make parameters for dynamic label propagation
 		'''
-
-		trX = np.load('training_features.npy') #the features of training data
-		teX = np.load('test_features.npy')	#the features of test data
-
+		
+		trX, teX = self.set_features() # training and test features
 		X = np.r_[trX,teX]
 
 		V = X.shape[0] #the number of data
@@ -87,43 +97,55 @@ class DynamicLabelPropagation:
 		dis_array = H - 2 * G + H.T
 
 		W = np.exp(-1 * dis_array / self.m)
+		print 'making W!'
+
 		for i in range(W.shape[0]):
 			W[i][i] = 0.0
 		W_sum = np.sum(W,axis = 1)
 
 		P = W / W_sum[:,np.newaxis]
-		
+		print 'making P!'
+
 		nearidx = np.argsort(dis_array,axis=1)
 		
 		for i in range(V):
 			for k in range(self.K):
 				WW[i][nearidx[i][k+1]] = W[i][nearidx[i][k+1]]
-		
+		print 'making WW!'
+
 		WW_sum = np.sum(WW,axis=1)
 		PP = WW / WW_sum[:,np.newaxis]
+		print 'making PP!'
 
-		np.save('P.npy',P) #save posibility transition matrix
-		np.save('W.npy',W) #save weight
-		np.save('WW.npy',WW)
-		np.save('PP.npy',PP)
+		if(not os.path.isdir('./parameters')) :
+			os.mkdir('./parameters')
+
+		np.save('./parameters/P.npy', P) #save posibility transition matrix
+		np.save('./parameters/W.npy', W) #save weight
+		np.save('./parameters/WW.npy', WW)
+		np.save('./parameters/PP.npy', PP)
 
 		print 'finish making parametars!'
 
-	def set_par(self):
-		'''
-		set parametars for label propagation
-		'''
-		P = np.load('P.npy')
-		PP = np.load('PP.npy')
+	def set_features(self) :
+		trX = np.load(self.trainingFeatures)
+		teX = np.load(self.testFeatures)
 
-		return P
+		return trX, teX
+
+	def set_labels(self) :
+		trY = np.load(self.trainingLabels)
+		teY = np.load(self.testLabels)
+
+		return trY, teY
 
 	def metrics_lp(self):
 		'''
+		print each static score
 		'''
 		thresholds = 0.5 #thresholds for dynamic label assignment after the iteration of LP
 		
-		teY = np.load('test_labels.npy') # label of test data
+		trY, teY = self.set_labels() # label of training and test data
 
 		y_pred = self.dlp() # assign a label
 		y_pred[np.where(y_pred > thresholds)] = 1
