@@ -25,7 +25,10 @@ python lp.py
 Usage for DLP
 ---
 ~~~
-python dlp.py
+>> from dlp import DynamicLabelPropagation()
+>> dlp = DynamicLabelPropagation()
+>> dlp.make_par()
+>> dlp.metrics_lp()
 ~~~
 
 Usage for LNP (I am sorry, I am revisioning a file of LNP...)
