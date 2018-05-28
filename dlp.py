@@ -139,9 +139,9 @@ class DynamicLabelPropagation:
 
 		return trY, teY
 
-	def metrics_lp(self):
+	def metrics_dlp(self):
 		'''
-		print each static score
+		print each static score of dlp
 		'''
 		thresholds = 0.5 #thresholds for dynamic label assignment after the iteration of LP
 		
@@ -161,4 +161,4 @@ class DynamicLabelPropagation:
 if __name__ == '__main__':
 	dlp = DynamicLabelPropagation()
 	dlp.make_par() # make parametars for dynamic label propagation
-	dlp.metrics_lp() # print micro recall, precision and f1 score of label propagation 
+	dlp.metrics_dlp() # print micro recall, precision and f1 score of label propagation 

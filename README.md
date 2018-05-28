@@ -19,7 +19,10 @@ Libraries Used
 Usage for LP
 ---
 ~~~
-python lp.py
+>> from lp import LabelPropagation()
+>> lp = LabelPropagation()
+>> lp.make_par()
+>> lp.metrics_lp()
 ~~~
 
 Usage for DLP
@@ -28,7 +31,7 @@ Usage for DLP
 >> from dlp import DynamicLabelPropagation()
 >> dlp = DynamicLabelPropagation()
 >> dlp.make_par()
->> dlp.metrics_lp()
+>> dlp.metrics_dlp()
 ~~~
 
 Usage for LNP (I am sorry, I am revisioning a file of LNP...)
